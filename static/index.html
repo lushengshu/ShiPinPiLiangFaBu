@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>抖音视频发布助手</title>
+  <link rel="stylesheet" href="/style.css?v=20261105-service-guard1">
+</head>
+<body>
+  <section id="modeChooser" class="mode-chooser" aria-label="选择发布平台">
+    <div class="mode-chooser-inner">
+      <p class="eyebrow">LOCAL CREATOR TOOL</p>
+      <h1>选择发布平台</h1>
+      <p class="mode-subtitle">抖音和视频号使用各自的队列、登录态和发布参数。</p>
+      <div class="mode-grid">
+        <button type="button" class="mode-card douyin-mode" data-mode="douyin">
+          <span class="mode-mark">抖</span>
+          <b>抖音发布</b>
+          <small>普通/全景视频 · 标题描述话题 · 横竖封面 · 定时权限</small>
+          <em>进入抖音发布页 →</em>
+        </button>
+        <button type="button" class="mode-card channels-mode" data-mode="channels">
+          <span class="mode-mark">视</span>
+          <b>视频号发布</b>
+          <small>独立队列 · 短标题 · 3:4/4:3 封面 · 合集 · 视频标注</small>
+          <em>进入视频号发布页 →</em>
+        </button>
+      </div>
+      <p id="modeHint" class="mode-hint" role="status"></p>
+    </div>
+  </section>
+  <main class="shell" id="douyinShell" hidden>
+    <header class="hero">
+      <div class="hero-copy">
+        <div class="brand-line">
+          <span class="brand-mark" aria-hidden="true">✦</span>
+          <p class="eyebrow">LOCAL CREATOR TOOL</p>
+          <span class="local-chip"><i aria-hidden="true"></i> 本机运行</span>
+        </div>
+        <h1>抖音视频发布助手</h1>
+        <p class="subtitle">从本地素材到抖音发布，一站整理、编辑、排期和提交。</p>
+      </div>
+
+      <div class="hero-console">
+        <div class="console-label"><span class="console-pulse" aria-hidden="true"></span>最后发布</div>
+        <div class="actions">
+          <div class="action-row action-row-primary">
+            <button id="uploadBtn" class="quiet-button upload-step">打开抖音上传页</button>
+            <button id="autoPublishBtn" class="publish-all" aria-describedby="publishHint">开始发布</button>
+            <button id="channelsPublishBtn" class="channels-publish-all" aria-describedby="publishHint" hidden>发布视频号</button>
+            <button id="channelsPauseBtn" class="quiet-button" aria-describedby="publishHint" hidden>暂停视频号</button>
+            <button id="channelsStopBtn" class="stop-publish" aria-describedby="publishHint" hidden>终止视频号</button>
+            <button id="stopPublishBtn" class="stop-publish" aria-describedby="publishHint" hidden>终止当前任务</button>
+          </div>
+          <div class="action-row action-row-utility">
+            <span class="publish-sequence"><b>确认内容无误后</b>，先打开上传页，再点击开始发布</span>
+            <button id="modeSwitchBtn" class="quiet-button mode-switch" type="button">切换平台</button>
+          </div>
+          <span id="publishHint" class="action-hint" role="status"></span>
+        </div>
+      </div>
+    </header>
+
+    <nav class="workflow-steps" id="workflowSteps" aria-label="发布流程">
+      <div class="workflow-step" data-step="1"><span>01</span><div><b>选择发布类型</b><small>普通或全景方式</small></div></div>
+      <span class="workflow-line" aria-hidden="true"></span>
+      <div class="workflow-step" data-step="2"><span>02</span><div><b>选择视频</b><small>加入发布队列</small></div></div>
+      <span class="workflow-line" aria-hidden="true"></span>
+      <div class="workflow-step" data-step="3"><span>03</span><div><b>校验视频</b><small>内容与发布环境</small></div></div>
+      <span class="workflow-line" aria-hidden="true"></span>
+      <div class="workflow-step" data-step="4"><span>04</span><div><b>匹配发布内容</b><small>文案、话题和设置</small></div></div>
+      <span class="workflow-line" aria-hidden="true"></span>
+      <div class="workflow-step" data-step="5"><span>05</span><div><b>确认并发布</b><small>打开上传页后提交</small></div></div>
+    </nav>
+
+    <div class="workspace-layout">
+      <div class="main-column">
+        <section class="stats" id="stats"></section>
+        <section id="publishStatus" class="publish-status" aria-live="polite" aria-atomic="true" hidden></section>
+        <section id="autoPauseNotice" class="auto-pause-notice" role="alert" aria-live="assertive" aria-atomic="true" hidden></section>
+
+        <section class="queue-panel">
+          <section class="queue-head">
+            <div class="queue-heading">
+              <div class="queue-title-row">
+                <div>
+                  <span class="section-kicker">CONTENT PIPELINE</span>
+                  <h2>发布队列</h2>
+                </div>
+                <button id="clearQueueBtn" class="danger-outline" type="button">清空队列</button>
+              </div>
+              <p id="rootHint"></p>
+            </div>
+            <label class="filter">查看 <select id="filter"><option value="all">全部素材</option><option value="pending">待发布/处理中</option><option value="scheduled">已配置定时</option><option value="failed">失败待处理</option><option value="published">已提交</option><option value="skipped">已跳过</option></select></label>
+          </section>
+          <div class="queue-tools" aria-label="发布类型、视频校验与内容匹配">
+            <div class="queue-stage stage-type" id="workflowTypeStage" data-stage="type">
+              <span class="stage-label"><b>01</b> 选择发布类型</span>
+              <div class="stage-actions workflow-type-actions">
+                <label class="workflow-type-select">视频类型
+                  <select id="workflowVideoType" aria-describedby="workflowTypeHint">
+                    <option value="normal">普通视频</option>
+                    <option value="panorama">全景视频</option>
+                  </select>
+                </label>
+                <label id="workflowPanoramaFormatWrap" class="workflow-type-select" hidden>全景格式
+                  <select id="workflowPanoramaFormat" aria-describedby="workflowTypeHint">
+                    <option value="">请选择全景格式</option>
+                    <option value="360_mono">360°普通单目</option>
+                    <option value="360_stereo">360°立体双目</option>
+                    <option value="180_mono">180°普通单目</option>
+                    <option value="180_stereo">180°立体双目</option>
+                  </select>
+                </label>
+                <span id="workflowTypeHint" class="stage-help workflow-type-hint" role="status"></span>
+              </div>
+            </div>
+            <span class="queue-tool-divider" aria-hidden="true"></span>
+            <div class="queue-stage stage-import" data-stage="import">
+              <span class="stage-label"><b>02</b> 选择视频</span>
+              <div class="stage-actions">
+                <div id="mediaPicker" class="media-picker">
+                  <button id="mediaPickerBtn" class="primary media-picker-trigger" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="mediaPickerMenu">选择视频 <span class="media-picker-caret" aria-hidden="true">▾</span></button>
+                  <div id="mediaPickerMenu" class="media-picker-menu" role="menu" hidden>
+                    <button id="folderBtn" class="secondary media-picker-option" type="button" role="menuitem"><span>▣</span> 选择视频文件夹</button>
+                    <button id="filesBtn" class="secondary media-picker-option" type="button" role="menuitem"><span>＋</span> 添加视频文件（可多选）</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <span class="queue-tool-divider" aria-hidden="true"></span>
+            <div class="queue-stage stage-verify" data-stage="verify">
+              <span class="stage-label"><b>03</b> 校验视频</span>
+              <div class="stage-actions">
+                <button id="checkBtn" class="secondary" type="button">检查发布环境</button>
+              </div>
+            </div>
+            <span class="queue-tool-divider" aria-hidden="true"></span>
+            <div class="queue-stage stage-match" data-stage="match">
+              <span class="stage-label"><b>04</b> 匹配发布内容</span>
+              <div class="stage-actions">
+                <div class="media-picker" id="copyMenuPicker">
+                  <button id="copyMenuBtn" class="secondary accent-secondary media-picker-trigger" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="copyMenu">文案 <span class="media-picker-caret" aria-hidden="true">▾</span></button>
+                  <div id="copyMenu" class="media-picker-menu" role="menu" hidden>
+                    <button id="generateCopyBtn" class="secondary media-picker-option" type="button" role="menuitem">一键生成文案</button>
+                    <button id="importCopyBtn" class="secondary media-picker-option" type="button" role="menuitem">导入文案</button>
+                    <button id="downloadTemplateBtn" class="secondary media-picker-option" type="button" role="menuitem">下载文案模板</button>
+                  </div>
+                </div>
+                <label class="check-label copy-overwrite" title="勾选后会替换现有文案，并先备份 queue.json"><input id="copyOverwriteInput" type="checkbox" checked> 替换现有文案</label>
+                <input id="captionImportInput" type="file" accept=".txt,.md,.json,.csv,.xlsx,text/plain,text/markdown,application/json,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+                <span class="stage-help">可导入 txt / md / JSON / CSV / Excel，或按歌名一键生成</span>
+                <span id="generateCopyHint" class="stage-help" role="status" aria-live="polite"></span>
+              </div>
+              <div class="panorama-bulk-tools" aria-label="批量覆盖队列发布类型">
+                <label>发布类型<select id="bulkVideoType"><option value="normal">普通视频</option><option value="panorama">全景视频</option></select></label>
+                <label id="bulkPanoramaFormatWrap" hidden>全景格式<select id="bulkPanoramaFormat"><option value="">请选择全景格式</option><option value="360_mono">360°普通单目</option><option value="360_stereo">360°立体双目</option><option value="180_mono">180°普通单目</option><option value="180_stereo">180°立体双目</option></select></label>
+                <button id="applyBulkVideoType" class="secondary" type="button">应用到勾选</button>
+                <span class="stage-help">用于已入队视频的显式覆盖</span>
+              </div>
+              <div class="cover-import-tools" aria-label="按文件名匹配自定义封面">
+                <button id="coverImportBtn" class="secondary" type="button">导入自定义封面</button>
+                <input id="coverImportInput" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple hidden>
+                <span id="coverImportHint" class="stage-help">按编号、名称片段和“封面”标记智能匹配；可分批导入，已匹配版本替换，未上传版本保留</span>
+              </div>
+            </div>
+          </div>
+          <section id="queueSelectionBar" class="queue-selection-bar" hidden>
+            <label class="select-all-label"><input id="selectAllQueue" type="checkbox"> 全选当前列表</label>
+            <span id="selectionSummary">已选择 0 条</span>
+            <button id="deleteSelectedBtn" class="danger-outline" type="button" disabled>删除所选</button>
+            <label>下载权限<select id="bulkDownload"><option value="true">允许下载</option><option value="false">禁止下载</option></select></label>
+            <button id="applyBulkDownload" class="secondary" type="button" disabled>应用下载权限</button>
+            <label>官方活动/话题匹配<select id="bulkOfficialTopic"><option value="true">开启匹配</option><option value="false">关闭匹配</option></select></label>
+            <button id="applyBulkOfficialTopic" class="secondary" type="button" disabled>应用匹配开关</button>
+            <span id="bulkPreferencesHint" role="status" class="stage-help">仅应用到勾选项；活动匹配仅支持全景视频</span>
+          </section>
+          <section id="schedulePlan" class="schedule-plan queue-schedule-plan" aria-label="队列定时发布计划">
+            <div class="schedule-plan-head">
+              <div>
+                <span class="section-kicker">05 PUBLISH CALENDAR</span>
+                <h2>定时发布</h2>
+                <p>在当前队列中设置抖音后台的预约时间，不是软件等待时间。</p>
+              </div>
+              <span id="schedulePlanSummary" class="schedule-plan-summary" role="status"></span>
+            </div>
+            <div class="schedule-plan-grid">
+              <label>批量计划模式
+                <select id="schedulePlanMode">
+                  <option value="scheduled">为待发布视频生成定时计划</option>
+                  <option value="immediate">将待发布视频设为立即发布</option>
+                </select>
+              </label>
+              <label>首条定时发布时间
+                <input id="scheduleStartAt" type="datetime-local" step="60">
+              </label>
+              <label>默认间隔（分钟）
+                <select id="scheduleDefaultInterval">
+                  <option value="2">2</option>
+                  <option value="10">10</option>
+                  <option value="20">20</option>
+                  <option value="30">30</option>
+                  <option value="40">40</option>
+                  <option value="50">50</option>
+                  <option value="60">60</option>
+                  <option value="100">100</option>
+                  <option value="custom">自定义</option>
+                </select>
+                <input id="scheduleCustomInterval" class="schedule-custom-interval" type="number" min="1" max="43200" step="1" placeholder="输入 1～43200 分钟" hidden>
+              </label>
+            </div>
+            <div class="schedule-plan-actions">
+              <button id="generateScheduleBtn" class="primary schedule-primary" type="button">生成定时计划</button>
+              <button id="allImmediateBtn" class="secondary" type="button">全部改为立即发布</button>
+              <button id="defaultScheduleBtn" class="ghost" type="button">填入默认时间</button>
+              <span id="schedulePlanHint" class="schedule-plan-hint" role="status"></span>
+              <span id="schedulePlanPreview" class="schedule-plan-preview" role="status"></span>
+            </div>
+          </section>
+          <section id="queue" class="queue"></section>
+          <p id="empty" class="empty" hidden>还没有发现视频。先在第 1 步选择普通/全景发布方式，再选择视频文件夹或一个/多个视频文件。</p>
+        </section>
+      </div>
+
+      <aside class="side-column">
+        <section class="notice workflow-card">
+          <div class="card-icon" aria-hidden="true">01</div>
+          <div>
+            <strong>当前动线</strong>
+            <span>先选择普通或全景发布方式；新增视频会进入对应上传流程。随后在队列中完成内容和发布环境校验，匹配文案、话题、封面与定时设置，确认无误后打开抖音上传页并发布。</span>
+          </div>
+        </section>
+
+        <section class="side-note">
+          <div class="side-note-title"><span class="side-note-dot"></span>安全提醒</div>
+          <p>编辑阶段只修改本地内容，不会自动发布。发布过程中遇到登录、验证码或封面要求时，浏览器页面会保留在现场。</p>
+        </section>
+      </aside>
+    </div>
+
+    <footer>
+      <a href="/README.md" target="_blank">使用说明</a>
+      <span>所有数据保存在本机的 .douyin_batch/queue.json</span>
+    </footer>
+  </main>
+  <script src="/app.js?v=20261105-service-guard1"></script>
+</body>
+</html>

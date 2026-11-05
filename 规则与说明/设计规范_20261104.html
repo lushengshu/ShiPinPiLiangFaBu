@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>抖音视频发布助手 — 设计规范系统</title>
+  <style>
+    :root {
+      --page-bg: #f4f6fb;
+      --card: #ffffff;
+      --ink: #172033;
+      --ink-soft: #334155;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --line-strong: #cbd5e1;
+      --brand: #5146d8;
+      --brand-soft: #eef2ff;
+      --brand-600: #4338ca;
+      --brand-400: #818cf8;
+      --publish: #0f766e;
+      --publish-soft: #ecfdf5;
+      --danger: #dc2626;
+      --danger-soft: #fff1f2;
+      --warning: #f59e0b;
+      --warning-soft: #fffbeb;
+      --success: #047857;
+      --success-soft: #d1fae5;
+      --purple: #7c3aed;
+      --purple-soft: #f5f3ff;
+      --shadow: 0 14px 36px rgba(30,41,59,.07);
+      --shadow-soft: 0 6px 18px rgba(30,41,59,.05);
+      --radius-xl: 26px;
+      --radius-lg: 20px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --radius-xs: 9px;
+      --radius-pill: 999px;
+    }
+    * { box-sizing: border-box; }
+    html { min-width: 320px; background: var(--page-bg); }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--page-bg);
+      color: var(--ink);
+      font: 14px/1.7 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft Yahei", sans-serif;
+    }
+    .shell { max-width: 1200px; margin: 0 auto; padding: 40px 30px 80px; }
+    h1 { margin: 0 0 6px; font-size: 32px; letter-spacing: -.03em; }
+    .subtitle { margin: 0 0 36px; color: var(--muted); font-size: 15px; }
+    h2 { margin: 48px 0 16px; padding-bottom: 10px; border-bottom: 2px solid var(--line); font-size: 22px; letter-spacing: -.02em; }
+    h3 { margin: 28px 0 10px; font-size: 16px; }
+    p { margin: 0 0 12px; color: var(--ink-soft); }
+    .section-kicker { display: block; margin-bottom: 4px; color: var(--brand); font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    .card { padding: 22px 24px; margin-bottom: 16px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--card); box-shadow: var(--shadow-soft); }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+    .card-grid-4 { grid-template-columns: repeat(4, 1fr); }
+    .card-grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .swatch { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: var(--radius-xs); background: #fff; }
+    .swatch-dot { width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0; border: 1px solid rgba(0,0,0,.06); }
+    .swatch-info { min-width: 0; }
+    .swatch-name { font-size: 13px; font-weight: 700; }
+    .swatch-hex { font-size: 11px; color: var(--muted); font-family: "JetBrains Mono", "SF Mono", monospace; }
+    .token-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .token-table th { text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--line); font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .token-table td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .token-table code { font-family: "JetBrains Mono", "SF Mono", monospace; font-size: 12px; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
+    .token-table .preview { width: 40px; height: 24px; border-radius: 6px; border: 1px solid rgba(0,0,0,.06); display: inline-block; }
+    .component-preview { padding: 20px; border: 1px dashed var(--line); border-radius: var(--radius-sm); background: #fafafa; }
+    .label { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .nav { position: sticky; top: 0; z-index: 50; background: rgba(244,246,251,.92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); padding: 12px 0; }
+    .nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 30px; display: flex; align-items: center; gap: 8px; overflow-x: auto; }
+    .nav a { padding: 6px 12px; border-radius: 8px; color: var(--ink-soft); font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+    .nav a:hover { background: var(--brand-soft); color: var(--brand); }
+    .principle-card { padding: 18px; border-left: 4px solid var(--brand); border-radius: 0 var(--radius-xs) var(--radius-xs) 0; background: var(--brand-soft); }
+    .principle-card h4 { margin: 0 0 6px; font-size: 14px; }
+    .principle-card p { margin: 0; font-size: 13px; color: var(--ink-soft); }
+    .spacing-demo { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .spacing-box { background: var(--brand-soft); border: 1px solid var(--brand-400); border-radius: 4px; }
+    .font-demo { margin-bottom: 16px; }
+    .font-demo .sample { margin: 6px 0 0; color: var(--ink); }
+    .font-demo .meta { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+    .radius-demo { display: inline-block; width: 64px; height: 64px; background: var(--brand); margin-right: 12px; }
+    .shadow-demo { display: inline-block; width: 80px; height: 48px; background: #fff; border: 1px solid var(--line); margin-right: 12px; margin-bottom: 12px; border-radius: 8px; }
+    .state-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 800; white-space: nowrap; margin-right: 6px; margin-bottom: 6px; }
+    .toc { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 36px; }
+    .toc-item { padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: #fff; text-decoration: none; color: inherit; transition: box-shadow .15s ease; }
+    .toc-item:hover { box-shadow: var(--shadow-soft); }
+    .toc-item b { display: block; font-size: 14px; margin-bottom: 3px; }
+    .toc-item span { font-size: 12px; color: var(--muted); }
+    .btn-demo {
+      display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px;
+      border: 0; border-radius: 11px; font-size: 13px; font-weight: 700; cursor: pointer;
+      margin-right: 8px; margin-bottom: 8px; transition: transform .16s ease, box-shadow .16s ease;
+    }
+    .btn-demo:hover { transform: translateY(-1px); }
+    .btn-primary { color: #fff; background: var(--brand); box-shadow: 0 7px 16px rgba(79,70,229,.2); }
+    .btn-secondary { color: var(--ink-soft); border: 1px solid var(--line); background: #fff; }
+    .btn-danger { color: #fff; background: linear-gradient(135deg, #e11d48, #be123c); box-shadow: 0 7px 17px rgba(225,29,72,.24); }
+    .btn-ghost { color: var(--muted); border: 1px solid var(--line); background: transparent; }
+    @media (max-width: 900px) {
+      .card-grid-4, .card-grid-3 { grid-template-columns: repeat(2, 1fr); }
+      .toc { grid-template-columns: 1fr; }
+      .shell { padding: 20px 16px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#principles">设计原则</a>
+    <a href="#colors">色彩系统</a>
+    <a href="#typography">字体系统</a>
+    <a href="#spacing">间距系统</a>
+    <a href="#radius">圆角与阴影</a>
+    <a href="#components">组件规范</a>
+    <a href="#layout">布局规范</a>
+    <a href="#states">状态与反馈</a>
+  </div>
+</nav>
+
+<main class="shell">
+
+  <span class="section-kicker">Design System</span>
+  <h1>抖音视频发布助手 — 设计规范</h1>
+  <p class="subtitle">本地视频批量发布管理工具的视觉设计系统，确保界面一致性、可访问性与工程可落地。</p>
+
+  <div class="toc">
+    <a href="#principles" class="toc-item"><b>设计原则</b><span>清晰、高效、可信赖的产品体验</span></a>
+    <a href="#colors" class="toc-item"><b>色彩系统</b><span>品牌色、语义色、中性色与使用规则</span></a>
+    <a href="#typography" class="toc-item"><b>字体系统</b><span>字号层级、字重与行高规范</span></a>
+    <a href="#spacing" class="toc-item"><b>间距系统</b><span>4px 基准网格与组件间距</span></a>
+    <a href="#radius" class="toc-item"><b>圆角与阴影</b><span>统一的层级表达与悬浮反馈</span></a>
+    <a href="#components" class="toc-item"><b>组件规范</b><span>按钮、输入框、卡片、徽章等原子组件</span></a>
+    <a href="#layout" class="toc-item"><b>布局规范</b><span>网格系统、断点策略与页面结构</span></a>
+    <a href="#states" class="toc-item"><b>状态与反馈</b><span>加载、成功、警告、错误等状态表达</span></a>
+    <a href="#tokens" class="toc-item"><b>Design Token 清单</b><span>可直接落地的 CSS 变量表</span></a>
+  </div>
+
+  <!-- 设计原则 -->
+  <h2 id="principles">设计原则</h2>
+  <div class="card-grid">
+    <div class="principle-card">
+      <h4>清晰有序</h4>
+      <p>视频发布是流程化操作，界面必须通过清晰的视觉层级引导用户按步骤完成：选择类型 → 导入视频 → 校验内容 → 匹配文案 → 确认发布。</p>
+    </div>
+    <div class="principle-card">
+      <h4>即时反馈</h4>
+      <p>上传进度、识别状态、发布结果等操作必须有实时状态反馈，避免用户因不确定而焦虑。状态变化使用颜色和动画双重提示。</p>
+    </div>
+    <div class="principle-card">
+      <h4>容错可控</h4>
+      <p>批量操作容易出错，每个视频卡片需独立可编辑、可跳过、可重试。错误状态明确告知原因和修复路径，不阻断整体流程。</p>
+    </div>
+    <div class="principle-card">
+      <h4>专业可信</h4>
+      <p>作为内容生产工具，视觉风格应沉稳专业。避免过度装饰，以功能性为主，通过精致的细节（圆角、阴影、微动效）传递品质感。</p>
+    </div>
+  </div>
+
+  <!-- 色彩系统 -->
+  <h2 id="colors">色彩系统</h2>
+  <h3>品牌色</h3>
+  <div class="card-grid card-grid-4">
+    <div class="swatch"><div class="swatch-dot" style="background:#5146d8"></div><div class="swatch-info"><div class="swatch-name">Brand 500</div><div class="swatch-hex">#5146d8</div></div></div>
+    <div class="swatch"><div class="swatch-dot" style="background:#4338ca"></div><div class="swatch-info"><div class="swatch-name">Brand 600</div><div class="swatch-hex">#4338ca</div></div></div>
+    <div class="swatch"><div class="swatch-dot" style="background:#818cf8"></div><div class="swatch-info"><div class="swatch-name">Brand 400</div><div class="swatch-hex">#818cf8</div></div></div>
+    <div class="swatch"><div class="swatch-dot" style="background:#eef2ff"></div><div class="swatch-info"><div class="swatch-name">Brand 50</div><div class="swatch-hex">#eef2ff</div></div></div>
+  </div>
+
+  <h3>语义色</h3>
+  <div class="card-grid card-grid-4">
+    <div class="swatch"><div class="swatch-dot" style="background:#047857"></div><div class="swatch-info"><div class="swatch-name">Success</div><div class="swatch-hex">#047857</div></div></div>
+    <div class="swatch"><div class="swatch-dot" style="background:#f59e0b"></div><div class="swatch-info"><div class="swatch-name">Warning</div><div class="swatch-hex">#f59e0b</div></div></div>
+    <div class="swatch"><div class="swatch-dot" style="background:#dc2626"></div><div class="swatch-info"><div class="swatch-name">Danger</div><div class="swatch-hex">#dc2626</div></div></div>
+    <div class="swatch"><div class="swatch-dot" style="background:#1d4ed8"></div><div class="swatch-info"><div class="swatch-name">Info</div><div class="swatch-hex">#1d4ed8</div></div></div>
+  </div>
+
+  <h3>中性色</h3>
+  <div class="card-grid card-grid-4">
+    <div class="swatch"><div class="swatch-dot" style="background:#172033"></div><div class="swatch-info"><div class="swatch-name">Ink</div><div class="swatch-hex">#172033</div></div></div>
+    <div class="swatch"><div class="swatch-dot" style="background:#334155"></div><div class="swatch-info"><div class="swatch-name">Ink Soft</div><div class="swatch-hex">#334155</div></div></div>
+    <div class="swatch"><div class="swatch-dot" style="background:#64748b"></div><div class="swatch-info"><div class="swatch-name">Muted</div><div class="swatch-hex">#64748b</div></div></div>
+    <div class="swatch"><div class="swatch-dot" style="background:#e2e8f0"></div><div class="swatch-info"><div class="swatch-name">Line</div><div class="swatch-hex">#e2e8f0</div></div></div>
+  </div>
+
+  <h3>色彩使用规则</h3>
+  <table class="token-table">
+    <tr><th>场景</th><th>颜色</th><th>说明</th></tr>
+    <tr><td>主按钮 / 品牌强调</td><td><span class="preview" style="background:#5146d8"></span> Brand 500</td><td>CTA 按钮、活跃状态、链接高亮</td></tr>
+    <tr><td>成功 / 已发布</td><td><span class="preview" style="background:#047857"></span> Success</td><td>发布完成、校验通过、正向反馈</td></tr>
+    <tr><td>警告 / 需关注</td><td><span class="preview" style="background:#f59e0b"></span> Warning</td><td>定时提醒、需要人工介入的暂停</td></tr>
+    <tr><td>错误 / 失败</td><td><span class="preview" style="background:#dc2626"></span> Danger</td><td>发布失败、清空队列、删除操作</td></tr>
+    <tr><td>信息 / 进行中</td><td><span class="preview" style="background:#1d4ed8"></span> Info</td><td>批量识别中、上传进度提示</td></tr>
+    <tr><td>正文</td><td><span class="preview" style="background:#172033"></span> Ink</td><td>标题、重要正文</td></tr>
+    <tr><td>次要文字</td><td><span class="preview" style="background:#334155"></span> Ink Soft</td><td>正文、描述</td></tr>
+    <tr><td>辅助文字</td><td><span class="preview" style="background:#64748b"></span> Muted</td><td>标签、提示、占位符</td></tr>
+    <tr><td>分割线 / 边框</td><td><span class="preview" style="background:#e2e8f0"></span> Line</td><td>卡片边框、分隔线</td></tr>
+    <tr><td>页面背景</td><td><span class="preview" style="background:#f4f6fb"></span> #f4f6fb</td><td>全局页面底色</td></tr>
+    <tr><td>卡片背景</td><td><span class="preview" style="background:#fff"></span> White</td><td>内容卡片、面板底色</td></tr>
+  </table>
+
+  <!-- 字体系统 -->
+  <h2 id="typography">字体系统</h2>
+  <h3>字体栈</h3>
+  <div class="card">
+    <code style="font-size:13px">-apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif</code>
+    <p style="margin-top:8px">优先使用系统原生字体，确保在各平台均有最佳的渲染效果。中文优先使用苹方/微软雅黑。</p>
+  </div>
+
+  <h3>字号层级</h3>
+  <div class="card">
+    <div class="font-demo"><div class="meta">Display / 32px / 字重 700 / 行高 1.15</div><div class="sample" style="font-size:32px;font-weight:700;line-height:1.15;letter-spacing:-.03em">抖音视频发布助手</div></div>
+    <div class="font-demo"><div class="meta">H1 / 22px / 字重 700 / 行高 1.25</div><div class="sample" style="font-size:22px;font-weight:700;letter-spacing:-.02em">发布队列</div></div>
+    <div class="font-demo"><div class="meta">H2 / 18px / 字重 700 / 行高 1.3</div><div class="sample" style="font-size:18px;font-weight:700">定时发布计划</div></div>
+    <div class="font-demo"><div class="meta">H3 / 16px / 字重 700 / 行高 1.35</div><div class="sample" style="font-size:16px;font-weight:700">视频标题</div></div>
+    <div class="font-demo"><div class="meta">Body / 14px / 字重 400 / 行高 1.7</div><div class="sample" style="font-size:14px">从本地素材到抖音发布，一站整理、识别、排期和提交。</div></div>
+    <div class="font-demo"><div class="meta">Small / 12px / 字重 400 / 行高 1.5</div><div class="sample" style="font-size:12px">请先选择视频文件夹或添加视频文件加入队列。</div></div>
+    <div class="font-demo"><div class="meta">Caption / 11px / 字重 700 / 行高 1.35</div><div class="sample" style="font-size:11px;font-weight:700">CONTENT PIPELINE</div></div>
+  </div>
+
+  <h3>字重使用</h3>
+  <table class="token-table">
+    <tr><th>字重</th><th>数值</th><th>使用场景</th></tr>
+    <tr><td>Regular</td><td>400</td><td>正文、描述、辅助文字</td></tr>
+    <tr><td>Medium</td><td>500</td><td>按钮文字、标签</td></tr>
+    <tr><td>SemiBold</td><td>600</td><td>统计数字、状态徽章</td></tr>
+    <tr><td>Bold</td><td>700</td><td>标题、重点信息、CTA 按钮</td></tr>
+    <tr><td>ExtraBold</td><td>800</td><td> eyebrow / kicker 标签、步骤编号</td></tr>
+  </table>
+
+  <!-- 间距系统 -->
+  <h2 id="spacing">间距系统</h2>
+  <h3>4px 基准网格</h3>
+  <div class="card">
+    <div class="spacing-demo"><div class="spacing-box" style="width:4px;height:4px"></div><code>space-1</code> 4px — 图标与文字间距</div>
+    <div class="spacing-demo"><div class="spacing-box" style="width:8px;height:8px"></div><code>space-2</code> 8px — 紧凑元素间距</div>
+    <div class="spacing-demo"><div class="spacing-box" style="width:12px;height:12px"></div><code>space-3</code> 12px — 按钮内边距、卡片内部间距</div>
+    <div class="spacing-demo"><div class="spacing-box" style="width:16px;height:16px"></div><code>space-4</code> 16px — 组件间标准间距</div>
+    <div class="spacing-demo"><div class="spacing-box" style="width:22px;height:22px"></div><code>space-5</code> 22px — 主栏与侧边栏间距</div>
+    <div class="spacing-demo"><div class="spacing-box" style="width:28px;height:28px"></div><code>space-7</code> 28px — 页面水平内边距</div>
+    <div class="spacing-demo"><div class="spacing-box" style="width:30px;height:30px"></div><code>space-8</code> 30px — Hero 区域内边距</div>
+  </div>
+
+  <h3>组件间距</h3>
+  <table class="token-table">
+    <tr><th>组件</th><th>内边距</th><th>外边距</th></tr>
+    <tr><td>页面容器</td><td>—</td><td>28px 30px 58px</td></tr>
+    <tr><td>Hero 区域</td><td>30px 32px 28px</td><td>—</td></tr>
+    <tr><td>队列面板</td><td>20px</td><td>—</td></tr>
+    <tr><td>视频卡片</td><td>18px</td><td>13px（卡片间）</td></tr>
+    <tr><td>按钮</td><td>9px 14px</td><td>—</td></tr>
+    <tr><td>输入框</td><td>7px 9px</td><td>4px（label 下方）</td></tr>
+    <tr><td>徽章</td><td>4px 9px</td><td>—</td></tr>
+  </table>
+
+  <!-- 圆角与阴影 -->
+  <h2 id="radius">圆角与阴影</h2>
+  <h3>圆角规范</h3>
+  <div class="card">
+    <div style="margin-bottom:16px"><div class="radius-demo" style="border-radius:26px"></div><code>radius-xl: 26px</code> — Hero 区域、大面板</div>
+    <div style="margin-bottom:16px"><div class="radius-demo" style="border-radius:20px"></div><code>radius-lg: 20px</code> — 队列面板、侧边栏卡片</div>
+    <div style="margin-bottom:16px"><div class="radius-demo" style="border-radius:16px"></div><code>radius-md: 16px</code> — 视频卡片、模态框</div>
+    <div style="margin-bottom:16px"><div class="radius-demo" style="border-radius:12px"></div><code>radius-sm: 12px</code> — 工具栏、小卡片</div>
+    <div style="margin-bottom:16px"><div class="radius-demo" style="border-radius:9px"></div><code>radius-xs: 9px</code> — 按钮、输入框、徽章</div>
+    <div><div class="radius-demo" style="border-radius:999px"></div><code>radius-pill: 999px</code> — 状态徽章、标签</div>
+  </div>
+
+  <h3>阴影规范</h3>
+  <div class="card">
+    <div style="margin-bottom:12px"><div class="shadow-demo" style="box-shadow:0 4px 12px rgba(15,23,42,.035)"></div><code>shadow-card</code> — 视频卡片悬浮前</div>
+    <div style="margin-bottom:12px"><div class="shadow-demo" style="box-shadow:0 6px 18px rgba(30,41,59,.05)"></div><code>shadow-soft</code> — 侧边栏卡片、轻量面板</div>
+    <div style="margin-bottom:12px"><div class="shadow-demo" style="box-shadow:0 14px 36px rgba(30,41,59,.07)"></div><code>shadow</code> — 队列面板、下拉菜单</div>
+    <div><div class="shadow-demo" style="box-shadow:0 16px 35px rgba(15,23,42,.2)"></div><code>shadow-dropdown</code> — 下拉菜单（深色背景上）</div>
+  </div>
+
+  <!-- 组件规范 -->
+  <h2 id="components">组件规范</h2>
+
+  <h3>按钮</h3>
+  <div class="component-preview">
+    <button class="btn-demo btn-primary">Primary — 主要操作</button>
+    <button class="btn-demo btn-secondary">Secondary — 次要操作</button>
+    <button class="btn-demo btn-danger">Danger — 危险操作</button>
+    <button class="btn-demo btn-ghost">Ghost — 文字按钮</button>
+  </div>
+  <table class="token-table">
+    <tr><th>变体</th><th>背景</th><th>文字色</th><th>边框</th><th>悬浮效果</th></tr>
+    <tr><td>Primary</td><td>Brand 500 #5146d8</td><td>White</td><td>无</td><td>背景加深 + 阴影增强 + translateY(-1px)</td></tr>
+    <tr><td>Secondary</td><td>White</td><td>Ink Soft</td><td>1px solid Line</td><td>边框变为 Brand 400 + 背景变为 Brand 50</td></tr>
+    <tr><td>Danger</td><td>线性渐变 #e11d48 → #be123c</td><td>White</td><td>无</td><td>阴影增强 + translateY(-1px)</td></tr>
+    <tr><td>Ghost</td><td>透明</td><td>Muted</td><td>1px solid Line</td><td>背景变为 #f8fafc</td></tr>
+  </table>
+
+  <h3>输入框</h3>
+  <div class="component-preview">
+    <input type="text" placeholder="输入作品描述" style="width:100%;min-height:36px;padding:7px 9px;border:1px solid var(--line);border-radius:9px;color:var(--ink);background:#fff;font-size:14px;">
+  </div>
+  <table class="token-table">
+    <tr><th>状态</th><th>边框</th><th>背景</th><th>说明</th></tr>
+    <tr><td>默认</td><td>Line #e2e8f0</td><td>White</td><td>未获得焦点时的状态</td></tr>
+    <tr><td>悬浮</td><td>Line</td><td>White</td><td>保持默认，不做变化</td></tr>
+    <tr><td>焦点</td><td>Brand 400 #818cf8</td><td>White</td><td>获得焦点时边框变色</td></tr>
+    <tr><td>禁用</td><td>Line</td><td>#f8fafc</td><td>opacity: 0.53</td></tr>
+  </table>
+
+  <h3>卡片</h3>
+  <div class="component-preview">
+    <div style="padding:18px;border:1px solid var(--line);border-radius:16px;background:#fff;box-shadow:0 4px 12px rgba(15,23,42,.035);max-width:400px;">
+      <div style="font-weight:800;margin-bottom:6px">视频卡片示例</div>
+      <div style="font-size:12px;color:var(--muted)">包含标题、状态、操作按钮的内容卡片</div>
+    </div>
+  </div>
+  <table class="token-table">
+    <tr><th>类型</th><th>圆角</th><th>阴影</th><th>边框</th><th>说明</th></tr>
+    <tr><td>标准卡片</td><td>16px</td><td>shadow-card</td><td>1px solid Line</td><td>视频卡片、分析面板</td></tr>
+    <tr><td>面板卡片</td><td>20px</td><td>shadow</td><td>1px solid Line</td><td>队列面板、侧边栏卡片</td></tr>
+    <tr><td>Hero 卡片</td><td>26px</td><td>0 20px 45px rgba(30,41,59,.19)</td><td>1px solid rgba(255,255,255,.18)</td><td>顶部操作区（深色背景）</td></tr>
+  </table>
+
+  <h3>状态徽章</h3>
+  <div class="component-preview">
+    <span class="state-badge" style="color:#92400e;background:#fef3c7">待处理</span>
+    <span class="state-badge" style="color:#1d4ed8;background:#dbeafe">处理中</span>
+    <span class="state-badge" style="color:#047857;background:#ccfbf1">已发布</span>
+    <span class="state-badge" style="color:#b91c1c;background:#fee2e2">失败</span>
+    <span class="state-badge" style="color:#6d28d9;background:#ede9fe">已定时</span>
+    <span class="state-badge" style="color:var(--muted);background:#f1f5f9">已跳过</span>
+  </div>
+
+  <!-- 布局规范 -->
+  <h2 id="layout">布局规范</h2>
+  <h3>网格系统</h3>
+  <div class="card">
+    <p>主工作区采用双栏布局：</p>
+    <ul>
+      <li><b>主栏</b>：<code>minmax(0, 1fr)</code> — 发布队列、视频卡片、工具栏</li>
+      <li><b>侧边栏</b>：<code>minmax(310px, 360px)</code> — 定时计划、操作指南、快捷信息</li>
+      <li><b>间距</b>：22px</li>
+    </ul>
+    <p>侧边栏使用 <code>position: sticky; top: 18px</code> 保持随页面滚动固定。</p>
+  </div>
+
+  <h3>响应式断点</h3>
+  <table class="token-table">
+    <tr><th>断点</th><th>宽度</th><th>布局变化</th></tr>
+    <tr><td>Desktop</td><td>> 1120px</td><td>双栏布局，完整功能展示</td></tr>
+    <tr><td>Tablet</td><td>900px - 1120px</td><td>侧边栏宽度压缩至 310px，Hero 变为单栏</td></tr>
+    <tr><td>Mobile</td><td>< 900px</td><td>单栏布局，侧边栏移至底部</td></tr>
+    <tr><td>Small</td><td>< 700px</td><td>工作流步骤隐藏描述，按钮全宽</td></tr>
+  </table>
+
+  <h3>页面结构</h3>
+  <div class="card">
+    <pre style="font-size:12px;line-height:1.8;color:var(--ink-soft);overflow-x:auto">
+shell (max-width: 1420px, centered)
+├── hero (渐变背景, 双栏: 标题区 + 控制台)
+├── workflow-steps (5步流程导航)
+└── workspace-layout (双栏)
+    ├── main-column
+    │   ├── stats (5列统计卡片)
+    │   ├── publish-status (状态提示)
+    │   ├── queue-panel
+    │   │   ├── queue-head (标题 + 筛选)
+    │   │   ├── queue-tools (工具栏)
+    │   │   └── queue (视频卡片列表)
+    │   └── footer
+    └── side-column (sticky)
+        ├── workflow-card (操作指南)
+        ├── schedule-plan (定时发布)
+        └── side-note (注意事项)</pre>
+  </div>
+
+  <!-- 状态与反馈 -->
+  <h2 id="states">状态与反馈</h2>
+  <h3>状态颜色映射</h3>
+  <table class="token-table">
+    <tr><th>状态</th><th>边框</th><th>背景</th><th>文字</th><th>说明</th></tr>
+    <tr><td>运行中</td><td>#bfdbfe</td><td>#eff6ff</td><td>#1d4ed8</td><td>批量识别、自动发布进行中</td></tr>
+    <tr><td>完成</td><td>#99f6e4</td><td>#f0fdfa</td><td>#0f766e</td><td>发布成功、识别完成</td></tr>
+    <tr><td>警告</td><td>#fbbf24</td><td>#fffbeb</td><td>#92400e</td><td>定时时间已过、需要调整</td></tr>
+    <tr><td>暂停</td><td>#c4b5fd</td><td>#f5f3ff</td><td>#6d28d9</td><td>人工处理等待中</td></tr>
+    <tr><td>停止</td><td>#fda4af</td><td>#fff1f2</td><td>#be123c</td><td>任务已终止</td></tr>
+  </table>
+
+  <h3>动效规范</h3>
+  <div class="card">
+    <table class="token-table">
+      <tr><th>动效</th><th>时长</th><th>缓动</th><th>说明</th></tr>
+      <tr><td>按钮悬浮</td><td>160ms</td><td>ease</td><td>translateY(-1px) + 阴影增强</td></tr>
+      <tr><td>卡片悬浮</td><td>160ms</td><td>ease</td><td>边框变色 + 阴影增强</td></tr>
+      <tr><td>焦点环</td><td>160ms</td><td>ease</td><td>outline 出现</td></tr>
+      <tr><td>通知滑入</td><td>180ms</td><td>ease-out</td><td>opacity 0→1 + translateY(-7px→0)</td></tr>
+      <tr><td>下拉展开</td><td>150ms</td><td>ease</td><td>旋转 caret</td></tr>
+      <tr><td>轮询刷新</td><td>—</td><td>—</td><td>1.5s 间隔（上传中）/ 0.5s 间隔（完成后）</td></tr>
+    </table>
+  </div>
+
+  <!-- Design Token 清单 -->
+  <h2 id="tokens">Design Token 清单</h2>
+  <div class="card">
+    <pre style="font-size:12px;line-height:1.8;color:var(--ink-soft);overflow-x:auto">
+:root {
+  /* === 色彩 === */
+  --ink: #172033;
+  --ink-soft: #334155;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --line-strong: #cbd5e1;
+  --bg: #f4f6fb;
+  --card: #ffffff;
+
+  /* 品牌 */
+  --brand: #5146d8;
+  --brand-600: #4338ca;
+  --brand-400: #818cf8;
+  --brand-soft: #eef2ff;
+
+  /* 语义 */
+  --publish: #0f766e;
+  --publish-soft: #ecfdf5;
+  --danger: #dc2626;
+  --danger-soft: #fff1f2;
+  --warning: #f59e0b;
+  --warning-soft: #fffbeb;
+  --success: #047857;
+  --success-soft: #d1fae5;
+  --purple: #7c3aed;
+  --purple-soft: #f5f3ff;
+
+  /* === 阴影 === */
+  --shadow: 0 14px 36px rgba(30, 41, 59, .07);
+  --shadow-soft: 0 6px 18px rgba(30, 41, 59, .05);
+  --shadow-card: 0 4px 12px rgba(15, 23, 42, .035);
+  --shadow-dropdown: 0 16px 35px rgba(15, 23, 42, .2);
+  --shadow-hero: 0 20px 45px rgba(30, 41, 59, .19);
+
+  /* === 圆角 === */
+  --radius-xl: 26px;
+  --radius-lg: 20px;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+  --radius-xs: 9px;
+  --radius-pill: 999px;
+
+  /* === 间距 === */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 22px;
+  --space-7: 28px;
+  --space-8: 30px;
+
+  /* === 字体 === */
+  --font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", monospace;
+
+  /* === 动效 === */
+  --transition-fast: 150ms ease;
+  --transition-normal: 160ms ease;
+  --transition-slow: 300ms ease;
+}</pre>
+  </div>
+
+  <footer>
+    <span>抖音视频发布助手 — 设计规范系统 v1.0</span>
+    <span>2026.10.23</span>
+  </footer>
+
+</main>
+
+</body>
+</html>

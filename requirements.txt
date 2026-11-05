@@ -1,0 +1,6 @@
+# 仅第三方依赖；其余均为 Python 标准库。
+playwright==1.60.0
+
+# 首次使用先安装浏览器：
+#   python3 -m pip install -r requirements.txt
+#   python3 -m playwright install chromium

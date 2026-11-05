@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# 运行数据、队列与日志（含本机绝对路径、发布记录）
+.douyin_batch/
+.channels_batch/
+*.log
+
+# 浏览器登录配置（含视频号 / 抖音 Cookie，禁止上传）
+.douyin_browser_profile/
+.channels_browser_profile/
+*_browser_profile/
+
+# 个人素材与历史归档
+文案/
+封面素材/
+技能/
+项目存档/
+tools/历史工具测试_20261030/
+
+# 本地工作区与工具缓存
+.dsh/
+.workbuddy/

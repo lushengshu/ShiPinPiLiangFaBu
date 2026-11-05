@@ -1,0 +1,13 @@
+#!/bin/zsh
+# 可双击的 macOS 应用入口。代码和数据仍保存在项目目录中，不复制视频文件。
+set -u
+ROOT_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
+if [[ -x "$ROOT_DIR/.venv/bin/python" ]]; then
+  PYTHON_BIN="$ROOT_DIR/.venv/bin/python"
+else
+  PYTHON_BIN="$(command -v python3 || true)"
+fi
+if [[ -z "$PYTHON_BIN" ]]; then
+  exit 1
+fi
+exec "$PYTHON_BIN" "$ROOT_DIR/launch_local_tool.py" --supervise "$@"
